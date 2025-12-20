@@ -66,7 +66,6 @@ export default function UploadPage() {
 
     try {
       const response = await submitPhaseTwoImage(base64Image);
-      console.log("Phase Two API Response:", response);
 
       localStorage.setItem("phase2_results", JSON.stringify(response));
 
@@ -75,7 +74,6 @@ export default function UploadPage() {
       const message =
         err instanceof Error ? err.message : "Phase Two API request failed.";
       setError(message);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -94,12 +92,16 @@ export default function UploadPage() {
       {error && <p className="text-red-600">{error}</p>}
 
       {previewUrl && (
-        <img src={previewUrl} alt="Image preview" className="w-full rounded-md" />
+        <img
+          src={previewUrl}
+          alt="Image preview"
+          className="w-full rounded-md"
+        />
       )}
 
       {base64Image && (
         <p className="text-sm text-green-700">
-          Image converted to Base64
+          Image ready for analysis
         </p>
       )}
 

@@ -68,13 +68,20 @@ export default function ResultsPage() {
   const aiAge = age[0]?.label;
   const aiGender = gender[0]?.label;
 
+  /*
+    AI defaults are derived from the highest-probability values
+    returned by the Phase Two API.
+
+    User-selected overrides are intentionally NOT persisted.
+    A page refresh resets the UI back to AI suggestions by design,
+    reinforcing that AI output is suggestive rather than authoritative.
+  */
   const finalRace = selectedRace ?? aiRace;
   const finalAge = selectedAge ?? aiAge;
   const finalGender = selectedGender ?? aiGender;
 
   return (
     <main style={{ display: "flex", padding: "2rem", gap: "2rem" }}>
-      {/* Sidebar */}
       <aside style={{ minWidth: "220px", borderRight: "1px solid #333" }}>
         <h2>Your Profile</h2>
         <p>
@@ -88,7 +95,6 @@ export default function ResultsPage() {
         </p>
       </aside>
 
-      {/* Results */}
       <section style={{ maxWidth: "700px" }}>
         <h1>AI Demographic Suggestions</h1>
         <p>Click a value to set your actual attribute.</p>
