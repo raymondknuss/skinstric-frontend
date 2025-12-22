@@ -1,81 +1,53 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { submitPhaseTwoImage } from "../services/phaseTwo";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import CameraCapture from "./CameraCapture"
+import { submitPhaseTwoImage } from "../services/phaseTwo"
+
+type Mode = "file" | "camera"
 
 export default function UploadPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [base64Image, setBase64Image] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<Mode>("file")
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [base64Image, setBase64Image] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0] ?? null;
-
-    if (!selectedFile) {
-      setFile(null);
-      setPreviewUrl(null);
-      setBase64Image(null);
-      setError(null);
-      return;
-    }
-
-    const validTypes = ["image/jpeg", "image/png"];
-
-    if (!validTypes.includes(selectedFile.type)) {
-      setFile(null);
-      setPreviewUrl(null);
-      setBase64Image(null);
-      setError("Please upload a JPG or PNG image.");
-      return;
-    }
-
-    setFile(selectedFile);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
-    setError(null);
-
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const result = reader.result;
-
-      if (typeof result === "string") {
-        const strippedBase64 = result.split(",")[1] ?? null;
-        setBase64Image(strippedBase64);
-      } else {
-        setBase64Image(null);
-      }
-    };
-
-    reader.readAsDataURL(selectedFile);
+  function resetAll() {
+    setPreviewUrl(null)
+    setBase64Image(null)
+    setError(null)
   }
 
-  function handleBack() {
-    router.push("/details");
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    resetAll()
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result as string
+      setPreviewUrl(result)
+      setBase64Image(result.split(",")[1])
+    }
+    reader.readAsDataURL(file)
   }
 
   async function handleProceed() {
-    if (!file || !!error || !base64Image) return;
-
-    setLoading(true);
-    setError(null);
+    if (!base64Image) return
+    setLoading(true)
 
     try {
-      const response = await submitPhaseTwoImage(base64Image);
-
-      localStorage.setItem("phase2_results", JSON.stringify(response));
-
-      router.push("/results");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Phase Two API request failed.";
-      setError(message);
+      const res = await submitPhaseTwoImage(base64Image)
+      localStorage.setItem("phase2_results", JSON.stringify(res))
+      router.push("/results")
+    } catch {
+      setError("Analysis failed.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -83,46 +55,52 @@ export default function UploadPage() {
     <div className="max-w-md mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Upload Your Image</h1>
 
-      <input
-        type="file"
-        accept="image/jpeg,image/png"
-        onChange={handleFileChange}
-      />
+      <div className="flex gap-4">
+        <button
+          onClick={() => {
+            setMode("file")
+            resetAll()
+          }}
+        >
+          Upload File
+        </button>
 
-      {error && <p className="text-red-600">{error}</p>}
+        <button
+          onClick={() => {
+            setMode("camera")
+            resetAll()
+          }}
+        >
+          Take Selfie
+        </button>
+      </div>
 
-      {previewUrl && (
-        <img
-          src={previewUrl}
-          alt="Image preview"
-          className="w-full rounded-md"
+      {mode === "file" && (
+        <>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          {previewUrl && <img src={previewUrl} className="rounded" />}
+        </>
+      )}
+
+      {mode === "camera" && (
+        <CameraCapture
+          onCapture={(url, base64) => {
+            setPreviewUrl(url)
+            setBase64Image(base64)
+          }}
+          onClear={resetAll}
         />
       )}
 
-      {base64Image && (
-        <p className="text-sm text-green-700">
-          Image ready for analysis
-        </p>
-      )}
+      {error && <p className="text-red-600">{error}</p>}
 
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="px-4 py-2 border rounded-md"
-        >
-          Back
-        </button>
-
-        <button
-          type="button"
-          onClick={handleProceed}
-          disabled={!file || !!error || !base64Image || loading}
-          className="px-4 py-2 rounded-md bg-black text-white disabled:opacity-50"
-        >
-          {loading ? "Processing..." : "Proceed"}
-        </button>
-      </div>
+      <button
+        onClick={handleProceed}
+        disabled={!base64Image || loading}
+        className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
+      >
+        {loading ? "Processing..." : "Proceed"}
+      </button>
     </div>
-  );
+  )
 }
