@@ -16,6 +16,7 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [devices, setDevices] = useState<VideoDevice[]>([])
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
@@ -27,11 +28,18 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
 
   useEffect(() => {
     void initialize()
-    return stopCamera
+    return () => {
+      stopCamera()
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current)
+      }
+    }
   }, [])
 
   async function initialize() {
     try {
+      setError(null)
+
       const list = await navigator.mediaDevices.enumerateDevices()
       const cams = list
         .filter(d => d.kind === "videoinput")
@@ -42,7 +50,7 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
       setSelectedDeviceId(id)
       await startCamera(id)
     } catch {
-      setError("Failed to access camera.")
+      scheduleCameraError()
     }
   }
 
@@ -51,9 +59,11 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
       streamRef.current.getTracks().forEach(t => t.stop())
       streamRef.current = null
     }
+
     if (videoRef.current) {
       videoRef.current.srcObject = null
     }
+
     setCameraReady(false)
   }
 
@@ -76,11 +86,26 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
       await video.play()
 
       if (video.videoWidth > 0) {
+        if (errorTimeoutRef.current) {
+          clearTimeout(errorTimeoutRef.current)
+          errorTimeoutRef.current = null
+        }
         setCameraReady(true)
+        setError(null)
       }
     } catch {
-      setError("Failed to start camera.")
+      scheduleCameraError()
     }
+  }
+
+  function scheduleCameraError() {
+    if (errorTimeoutRef.current) return
+
+    errorTimeoutRef.current = setTimeout(() => {
+      if (!cameraReady) {
+        setError("Unable to start the camera.")
+      }
+    }, 800)
   }
 
   function handleTakePhoto() {
@@ -107,37 +132,55 @@ export default function CameraCapture({ onCapture, onClear }: CameraCaptureProps
 
   async function handleRetake() {
     setImageDataUrl(null)
+    setError(null)
     onClear()
     await startCamera(selectedDeviceId)
   }
 
   return (
     <div className="space-y-4">
-      {error && <p className="text-red-600">{error}</p>}
+      {error && !cameraReady && (
+        <p className="text-red-600">{error}</p>
+      )}
 
       {!imageDataUrl && (
-        <video
-          key={videoKey}
-          ref={videoRef}
-          className="w-full max-w-md bg-black rounded"
-        />
+        <>
+          <video
+            key={videoKey}
+            ref={videoRef}
+            className="w-full max-w-md bg-black rounded"
+          />
+          {!cameraReady && !error && (
+            <p className="text-sm text-gray-500">Initializing camera…</p>
+          )}
+        </>
       )}
 
       <canvas ref={canvasRef} className="hidden" />
 
       {imageDataUrl && (
-        <img src={imageDataUrl} className="w-full max-w-md rounded" />
+        <img
+          src={imageDataUrl}
+          className="w-full max-w-md rounded"
+        />
       )}
 
       <div className="flex gap-4">
         {!imageDataUrl && (
-          <button onClick={handleTakePhoto} disabled={!cameraReady}>
+          <button
+            onClick={handleTakePhoto}
+            disabled={!cameraReady}
+            className="px-4 py-2 border rounded disabled:opacity-40"
+          >
             Take Photo
           </button>
         )}
 
         {imageDataUrl && (
-          <button onClick={handleRetake}>
+          <button
+            onClick={handleRetake}
+            className="px-4 py-2 border rounded"
+          >
             Retake
           </button>
         )}
