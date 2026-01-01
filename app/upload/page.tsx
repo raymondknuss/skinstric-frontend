@@ -1,115 +1,167 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import CameraCapture from "./CameraCapture"
+
+import Phase1Header from "../components/Phase1Header"
+import Phase1BackButton from "../components/Phase1BackButton"
+import RotatingDottedSquares from "../components/RotatingDottedSquares"
+import ProcessingDots from "../components/ProcessingDots"
+
+import "./upload.css"
+
 import { submitPhaseTwoImage } from "../services/phaseTwo"
 
-type Mode = "file" | "camera"
+type UploadState = "idle" | "preparing" | "success"
+
+type CSSVars = React.CSSProperties & {
+  ["--upload-scale"]?: string
+}
 
 export default function UploadPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const [mode, setMode] = useState<Mode>("file")
+  const [state, setState] = useState<UploadState>("idle")
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [base64Image, setBase64Image] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [scale, setScale] = useState<number>(1)
 
-  function resetAll() {
-    setPreviewUrl(null)
-    setBase64Image(null)
-    setError(null)
+  useEffect(() => {
+    function computeScale() {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const sx = vw / 1920
+      const sy = vh / 960
+      const s = Math.min(sx, sy)
+      setScale(Math.max(0.45, Math.min(1, s)))
+    }
+
+    computeScale()
+    window.addEventListener("resize", computeScale)
+    return () => window.removeEventListener("resize", computeScale)
+  }, [])
+
+  function handleGalleryClick() {
+    fileInputRef.current?.click()
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    resetAll()
     const file = e.target.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       const result = reader.result as string
+      const parts = result.split(",")
+      const base64 = parts.length > 1 ? parts[1] : ""
+
       setPreviewUrl(result)
-      setBase64Image(result.split(",")[1])
+      setState("preparing")
+
+      try {
+        await submitPhaseTwoImage(base64)
+        setState("success")
+      } catch {
+        setState("idle")
+        setPreviewUrl(null)
+      }
     }
+
     reader.readAsDataURL(file)
   }
 
-  async function handleProceed() {
-    if (!base64Image) return
-    setLoading(true)
-    setError(null)
-
-    try {
-      const res = await submitPhaseTwoImage(base64Image)
-      localStorage.setItem("phase2_results", JSON.stringify(res))
-      router.push("/results")
-    } catch {
-      setError("We couldn’t analyze that image. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  function handleSuccessConfirm() {
+    router.push("/results")
   }
 
-  const interactionLocked = loading || !!base64Image
+  const rootStyle: CSSVars = {
+    ["--upload-scale"]: String(scale),
+  }
 
   return (
-    <div className="max-w-md mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Upload Your Image</h1>
+    <div className="upload-root" style={rootStyle}>
+      <Phase1Header />
 
-      <div className="flex gap-4">
-        <button
-          disabled={interactionLocked}
-          className="px-4 py-2 border rounded disabled:opacity-40"
-          onClick={() => {
-            setMode("file")
-            resetAll()
-          }}
+      <div className="upload-stage">
+        <div
+          className="upload-zone upload-zone-camera"
+          onClick={() => router.push("/upload/CameraCapture")}
         >
-          Upload File
-        </button>
+          <div className="upload-squares">
+            <RotatingDottedSquares />
+          </div>
+          <div className="upload-icon camera" />
+          <div className="upload-label">
+            ALLOW A.I.
+            <br />
+            TO SCAN YOUR FACE
+          </div>
+          <div className="upload-connector upload-connector-camera" />
+          <div className="upload-connector-dot upload-connector-dot-camera" />
+        </div>
 
-        <button
-          disabled={interactionLocked}
-          className="px-4 py-2 border rounded disabled:opacity-40"
-          onClick={() => {
-            setMode("camera")
-            resetAll()
-          }}
+        <div
+          className="upload-zone upload-zone-gallery"
+          onClick={handleGalleryClick}
         >
-          Take Selfie
-        </button>
-      </div>
+          <div className="upload-squares">
+            <RotatingDottedSquares />
+          </div>
+          <div className="upload-icon gallery" />
+          <div className="upload-label">
+            ALLOW A.I.
+            <br />
+            ACCESS GALLERY
+          </div>
+          <div className="upload-connector upload-connector-gallery" />
+          <div className="upload-connector-dot upload-connector-dot-gallery" />
+        </div>
 
-      <div className={loading ? "opacity-60 pointer-events-none space-y-4" : "space-y-4"}>
-        {mode === "file" && (
-          <>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-            {previewUrl && <img src={previewUrl} className="rounded" />}
-          </>
-        )}
+        <div className="upload-preview">
+          <div className="preview-title">Preview</div>
+          <div className="preview-box">
+            {previewUrl ? <img src={previewUrl} alt="Preview" /> : null}
+          </div>
+        </div>
 
-        {mode === "camera" && (
-          <CameraCapture
-            onCapture={(url, base64) => {
-              setPreviewUrl(url)
-              setBase64Image(base64)
-            }}
-            onClear={resetAll}
+        <div className="upload-back">
+          <Phase1BackButton
+            label="BACK"
+            path="/testing"
+            onClick={() => router.push("/testing")}
           />
-        )}
-
-        {error && <p className="text-red-600">{error}</p>}
+        </div>
       </div>
 
-      <button
-        onClick={handleProceed}
-        disabled={!base64Image || loading}
-        className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
-      >
-        {loading ? "Analyzing image…" : "Proceed"}
-      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="upload-hidden-input"
+        onChange={handleFileChange}
+      />
+
+      {state === "preparing" ? (
+        <div className="upload-overlay">
+          <div className="upload-processing">
+            <div className="processing-text">
+              PREPARING YOUR ANALYSIS...
+            </div>
+            <ProcessingDots />
+          </div>
+        </div>
+      ) : null}
+
+      {state === "success" ? (
+        <div className="upload-overlay">
+          <div className="upload-success">
+            <div>Image analyzed successfully!</div>
+            <button className="upload-ok" onClick={handleSuccessConfirm}>
+              OK
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
