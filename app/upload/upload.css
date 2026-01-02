@@ -58,7 +58,6 @@
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ICON-ONLY HOVER (SMOOTH, GUARDED) */
 .upload-zone:has(.upload-icon:hover) .upload-icon {
   transform: scale(1.12);
 }
@@ -79,6 +78,7 @@
   color: #111111;
   z-index: 3;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 .upload-zone-camera .upload-label {
@@ -136,10 +136,6 @@
   top: 295px;
 }
 
-/* ───────────────────────────── */
-/* PREVIEW — MATCH ORIGINAL */
-/* ───────────────────────────── */
-
 .upload-preview {
   position: absolute;
   right: -32px;
@@ -168,10 +164,6 @@
   object-fit: cover;
 }
 
-/* ───────────────────────────── */
-/* BACK — FORCE MATCH TESTING */
-/* ───────────────────────────── */
-
 .upload-back {
   position: absolute;
   left: 64px;
@@ -187,8 +179,6 @@
 .upload-back .p1-navBtn-hover {
   transform: scale(1.7);
 }
-
-/* ───────────────────────────── */
 
 .upload-hidden-input {
   position: absolute;
@@ -229,4 +219,116 @@
   color: #ffffff;
   font-size: 12px;
   letter-spacing: 0.12em;
+}
+
+.upload-cameraOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+
+.upload-permissionCard {
+  width: 352px;
+  height: 136px;
+  background: #1a1b1c;
+  color: #fcfcfc;
+  position: relative;
+}
+
+.upload-permissionTitle {
+  position: absolute;
+  left: 20px;
+  top: 22px;
+  right: 20px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.upload-permissionDivider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100px;
+  height: 1px;
+  background: rgba(252, 252, 252, 0.9);
+}
+
+.upload-permissionActions {
+  position: absolute;
+  right: 20px;
+  bottom: 12px;
+  display: flex;
+  gap: 22px;
+}
+
+.upload-permissionBtn {
+  border: none;
+  background: transparent;
+  color: rgba(252, 252, 252, 0.95);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+.upload-permissionBtn:hover {
+  opacity: 0.92;
+}
+
+.upload-permissionBtn:active {
+  opacity: 0.82;
+}
+
+.upload-cameraBootCard {
+  position: fixed;
+  inset: 0;
+  background: #fcfcfc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-cameraBootCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-cameraBootText {
+  margin-top: 24px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #1a1b1c;
+  text-align: center;
+  z-index: 3;
+}
+
+.upload-cameraBootIcon svg {
+  width: min(420px, 70vw);
+  height: auto;
+  display: block;
+}
+
+.upload-cameraBootInstructions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.upload-cameraBootInstructions img {
+  width: min(492px, 72vw);
+  height: auto;
+  display: block;
+  user-select: none;
+  pointer-events: none;
 }
