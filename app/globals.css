@@ -29,3 +29,47 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.p1-header {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.p1-headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #111111;
+}
+
+.p1-brand {
+  font-weight: 600;
+}
+
+.p1-bracket {
+  opacity: 0.65;
+}
+
+.p1-section {
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+.p1-enterCode {
+  background: #111111;
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  cursor: default;
+}

@@ -1,0 +1,279 @@
+.p1Slide1 {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #fcfcfc;
+  overflow: hidden;
+  font-family: "Roobert TRIAL", system-ui, sans-serif;
+}
+
+.p1Canvas {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+}
+
+.p1Bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.p1Bg::before,
+.p1Bg::after {
+  content: "";
+  position: absolute;
+  width: 200vw;
+  height: 1px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.18);
+  top: 50%;
+  left: -50vw;
+}
+
+.p1Bg::before {
+  transform: rotate(45deg);
+}
+
+.p1Bg::after {
+  transform: rotate(-45deg);
+}
+
+.p1HeroWrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.p1Hero {
+  margin: 0;
+  font-size: 128px;
+  font-weight: 300;
+  line-height: 120px;
+  letter-spacing: -0.07em;
+  text-align: center;
+  color: #1a1b1c;
+}
+
+.p1HeroLine {
+  display: block;
+}
+
+.p1LeftCta,
+.p1RightCta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.p1LeftCta {
+  left: 108px;
+}
+
+.p1RightCta {
+  right: 108px;
+}
+
+.p1Cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #111111;
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p1CtaLabel {
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.p1DiamondIcon {
+  display: block;
+  flex-shrink: 0;
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p1Cta:hover {
+  transform: scale(1.05);
+}
+
+.p1Cta:hover .p1DiamondIcon {
+  transform: scale(1.08);
+}
+
+.p1Footer {
+  position: absolute;
+  left: 64px;
+  bottom: 56px;
+  max-width: 340px;
+  z-index: 3;
+}
+
+.p1FooterText {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.p1FooterText span {
+  display: block;
+}
+
+@media (min-width: 769px) {
+  .p1StateLeft .p1HeroWrap {
+    transform: translate(calc(-50% + 320px), -50%);
+  }
+
+  .p1StateRight .p1HeroWrap {
+    transform: translate(calc(-50% - 320px), -50%);
+  }
+
+  .p1StateLeft .p1RightCta {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.98);
+    pointer-events: none;
+  }
+
+  .p1StateRight .p1LeftCta {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.98);
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .p1Slide1 {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .p1Canvas {
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 120px 24px 56px;
+  }
+
+  .p1HeroWrap {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin-top: 72px;
+    margin-bottom: 28px;
+    transition: none;
+    order: 1;
+  }
+
+  .p1LeftCta,
+  .p1RightCta {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    order: 2;
+  }
+
+  .p1LeftCta {
+    margin-bottom: 14px;
+  }
+
+  .p1RightCta {
+    margin-bottom: 26px;
+  }
+
+  .p1CtaLabel {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .p1DiamondIcon {
+    transform: translateY(8px) scale(0.85);
+  }
+
+  .p1Footer {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    max-width: 340px;
+    width: 100%;
+    margin-top: 0;
+    order: 3;
+  }
+
+  .p1FooterText {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .p1StateLeft .p1HeroWrap,
+  .p1StateRight .p1HeroWrap {
+    transform: none;
+  }
+
+  .p1StateLeft .p1RightCta,
+  .p1StateRight .p1LeftCta {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .p1Hero {
+    font-size: 44px;
+    line-height: 46px;
+    letter-spacing: -0.05em;
+  }
+}
+
+@media (max-width: 480px) {
+  .p1Canvas {
+    padding: 112px 20px 52px;
+  }
+
+  .p1HeroWrap {
+    margin-top: 64px;
+    margin-bottom: 26px;
+  }
+
+  .p1Hero {
+    font-size: 40px;
+    line-height: 42px;
+  }
+
+  .p1CtaLabel {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .p1DiamondIcon {
+    transform: translateY(10px) scale(0.8);
+  }
+}
