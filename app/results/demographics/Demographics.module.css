@@ -1,0 +1,160 @@
+.viewport {
+  background: #fff;
+  min-height: 100vh;
+  padding-top: 86px;
+}
+
+.pageHeader {
+  padding: 0.5rem 3rem 0.75rem;
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff;
+}
+
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 64px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.sub {
+  margin-top: 0.75rem;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.loadingPad {
+  height: 60vh;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr 320px;
+  gap: 2.5rem;
+  padding: 3rem;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.leftBox {
+  background: #f2f2f2;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.leftHover {
+  background: #e0e0e0;
+}
+
+.leftActive {
+  background: #111;
+  color: #fff;
+}
+
+.leftTop {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.leftBottom {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.center {
+  background: #f7f7f7;
+  padding: 2.5rem;
+}
+
+.centerLabel {
+  font-size: 28px;
+  margin-bottom: 1.5rem;
+}
+
+.ringWrap {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin: 2rem auto;
+}
+
+.ringSvg {
+  display: block;
+}
+
+.ring {
+  transition: stroke-dashoffset 480ms ease;
+}
+
+.ringText {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  font-weight: 600;
+  color: #111;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 1rem;
+}
+
+.rightRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f2f2f2;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.rightHover {
+  background: #e0e0e0;
+}
+
+.rightActive {
+  background: #111;
+  color: #fff;
+}
+
+.footer {
+  height: 5.5rem;
+  padding: 0 2.2rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  background: #fff;
+  border-top: 1px solid #e6e6e6;
+  margin-top: 0.75rem;
+}
+
+.footerText {
+  text-align: center;
+  font-size: 13px;
+  color: #444;
+}

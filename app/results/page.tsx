@@ -1,170 +1,219 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-type Distribution = Record<string, number>;
+import Phase1Header from "../components/Phase1Header";
+import Phase1BackButton from "../components/Phase1BackButton";
+import NavDiamondArrow from "@/components/NavDiamondArrow";
 
-type PhaseTwoData = {
-  race: Distribution;
-  age: Distribution;
-  gender: Distribution;
-};
-
-type PhaseTwoResponse = {
-  success: boolean;
-  message: string;
-  data: PhaseTwoData;
-};
-
-type Item = {
-  label: string;
-  percentage: number;
-};
-
-function formatDistribution(dist: Distribution): Item[] {
-  return Object.entries(dist)
-    .map(([label, value]) => ({
-      label,
-      percentage: value * 100,
-    }))
-    .sort((a, b) => b.percentage - a.percentage);
-}
+type HoverTarget = "demographics" | "cosmetic" | "skin" | "weather" | null;
 
 export default function ResultsPage() {
-  const [data, setData] = useState<PhaseTwoData | null>(null);
+  const router = useRouter();
 
-  const [selectedRace, setSelectedRace] = useState<string | null>(null);
-  const [selectedAge, setSelectedAge] = useState<string | null>(null);
-  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<HoverTarget>(null);
+  const [isSummaryHover, setIsSummaryHover] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("phase2_results");
-    if (!stored) return;
+  const enterDemographics = () => {
+    router.push("/results/demographics");
+  };
 
-    try {
-      const parsed: PhaseTwoResponse = JSON.parse(stored);
-      if (parsed.success && parsed.data) {
-        setData(parsed.data);
-      }
-    } catch {
-      setData(null);
-    }
-  }, []);
+  const bgSize = useMemo(() => {
+    if (hovered === "demographics") return 460;
+    if (hovered === "cosmetic" || hovered === "skin") return 560;
+    if (hovered === "weather") return 680;
+    return 0;
+  }, [hovered]);
 
-  if (!data) {
-    return (
-      <main style={{ padding: "2rem" }}>
-        <h1>Results</h1>
-        <p>No results available.</p>
-      </main>
-    );
-  }
+  const stageSize = 520;
+  const diamondSize = 190;
+  const gap = 14;
 
-  const race = formatDistribution(data.race);
-  const age = formatDistribution(data.age);
-  const gender = formatDistribution(data.gender);
+  const center = stageSize / 2;
+  const offset = diamondSize / 2 + gap;
 
-  const aiRace = race[0]?.label;
-  const aiAge = age[0]?.label;
-  const aiGender = gender[0]?.label;
-
-  /*
-    AI defaults are derived from the highest-probability values
-    returned by the Phase Two API.
-
-    User-selected overrides are intentionally NOT persisted.
-    A page refresh resets the UI back to AI suggestions by design,
-    reinforcing that AI output is suggestive rather than authoritative.
-  */
-  const finalRace = selectedRace ?? aiRace;
-  const finalAge = selectedAge ?? aiAge;
-  const finalGender = selectedGender ?? aiGender;
+  const diamondBase: React.CSSProperties = {
+    width: `${diamondSize}px`,
+    height: `${diamondSize}px`,
+    clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+    display: "grid",
+    placeItems: "center",
+    textAlign: "center",
+    fontWeight: 700,
+    fontSize: "13px",
+    letterSpacing: "0.02em",
+    textTransform: "uppercase",
+    userSelect: "none",
+  };
 
   return (
-    <main style={{ display: "flex", padding: "2rem", gap: "2rem" }}>
-      <aside style={{ minWidth: "220px", borderRight: "1px solid #333" }}>
-        <h2>Your Profile</h2>
-        <p>
-          <strong>Race:</strong> {finalRace}
-        </p>
-        <p>
-          <strong>Age:</strong> {finalAge}
-        </p>
-        <p>
-          <strong>Gender:</strong> {finalGender}
-        </p>
-      </aside>
+    <>
+      <Phase1Header />
 
-      <section style={{ maxWidth: "700px" }}>
-        <h1>AI Demographic Suggestions</h1>
-        <p>Click a value to set your actual attribute.</p>
-
-        <section>
-          <h2>Race</h2>
-          <p>
-            AI Suggestion: <strong>{aiRace}</strong>
+      <main
+        style={{
+          height: "100vh",
+          overflow: "hidden",
+          position: "relative",
+          padding: "0 3rem",
+        }}
+      >
+        <div style={{ paddingTop: "4.5rem" }}>
+          <h1 style={{ margin: 0 }}>A.I. Analysis</h1>
+          <p style={{ marginTop: "22px", marginBottom: 0 }}>
+            A.I. has estimated the following.
           </p>
-          <ul>
-            {race.map((item) => (
-              <li
-                key={item.label}
-                onClick={() => setSelectedRace(item.label)}
-                style={{
-                  cursor: "pointer",
-                  fontWeight:
-                    finalRace === item.label ? "bold" : "normal",
-                }}
-              >
-                {item.label}: {item.percentage.toFixed(2)}%
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section>
-          <h2>Age</h2>
-          <p>
-            AI Suggestion: <strong>{aiAge}</strong>
+          <p style={{ marginTop: "18px", marginBottom: 0 }}>
+            Fix estimated information if needed.
           </p>
-          <ul>
-            {age.map((item) => (
-              <li
-                key={item.label}
-                onClick={() => setSelectedAge(item.label)}
-                style={{
-                  cursor: "pointer",
-                  fontWeight:
-                    finalAge === item.label ? "bold" : "normal",
-                }}
-              >
-                {item.label}: {item.percentage.toFixed(2)}%
-              </li>
-            ))}
-          </ul>
-        </section>
+        </div>
 
-        <section>
-          <h2>Gender</h2>
-          <p>
-            AI Suggestion: <strong>{aiGender}</strong>
-          </p>
-          <ul>
-            {gender.map((item) => (
-              <li
-                key={item.label}
-                onClick={() => setSelectedGender(item.label)}
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: `${stageSize}px`,
+              height: `${stageSize}px`,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                width: `${bgSize}px`,
+                height: `${bgSize}px`,
+                border: "2px dotted #cfcfcf",
+                transform: "translate(-50%, -50%) rotate(45deg)",
+                opacity: hovered ? 1 : 0,
+                transition: "opacity 140ms ease",
+                pointerEvents: "none",
+              }}
+            />
+
+            <div
+              style={{
+                position: "absolute",
+                left: `${center}px`,
+                top: `${center - offset}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <div
                 style={{
+                  ...diamondBase,
+                  background:
+                    hovered === "demographics" ? "#d6d6d6" : "#e1e1e1",
                   cursor: "pointer",
-                  fontWeight:
-                    finalGender === item.label ? "bold" : "normal",
                 }}
+                onMouseEnter={() => setHovered("demographics")}
+                onMouseLeave={() => setHovered(null)}
+                onClick={enterDemographics}
               >
-                {item.label}: {item.percentage.toFixed(2)}%
-              </li>
-            ))}
-          </ul>
-        </section>
-      </section>
-    </main>
+                DEMOGRAPHICS
+              </div>
+            </div>
+
+            <div
+              style={{
+                position: "absolute",
+                left: `${center - offset}px`,
+                top: `${center}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <div
+                style={{
+                  ...diamondBase,
+                  background:
+                    hovered === "cosmetic" ? "#d6d6d6" : "#f2f2f2",
+                  cursor: "not-allowed",
+                }}
+                onMouseEnter={() => setHovered("cosmetic")}
+                onMouseLeave={() => setHovered(null)}
+              >
+                COSMETIC
+                <br />
+                CONCERNS
+              </div>
+            </div>
+
+            <div
+              style={{
+                position: "absolute",
+                left: `${center + offset}px`,
+                top: `${center}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <div
+                style={{
+                  ...diamondBase,
+                  background: hovered === "skin" ? "#d6d6d6" : "#f2f2f2",
+                  cursor: "not-allowed",
+                }}
+                onMouseEnter={() => setHovered("skin")}
+                onMouseLeave={() => setHovered(null)}
+              >
+                SKIN TYPE DETAILS
+              </div>
+            </div>
+
+            <div
+              style={{
+                position: "absolute",
+                left: `${center}px`,
+                top: `${center + offset}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <div
+                style={{
+                  ...diamondBase,
+                  background: hovered === "weather" ? "#d6d6d6" : "#f2f2f2",
+                  cursor: "not-allowed",
+                }}
+                onMouseEnter={() => setHovered("weather")}
+                onMouseLeave={() => setHovered(null)}
+              >
+                WEATHER
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ position: "fixed", bottom: "2.2rem", left: "2.2rem" }}>
+          <Phase1BackButton
+            label="BACK"
+            path="/upload"
+            onClick={() => router.push("/upload")}
+          />
+        </div>
+
+        <div style={{ position: "fixed", bottom: "2.2rem", right: "2.2rem" }}>
+          <button
+            type="button"
+            className={isSummaryHover ? "p1-navBtn p1-navBtn-hover" : "p1-navBtn"}
+            onMouseEnter={() => setIsSummaryHover(true)}
+            onMouseLeave={() => setIsSummaryHover(false)}
+            onClick={enterDemographics}
+            aria-label="GET SUMMARY"
+          >
+            <span className="p1-navLabel">GET SUMMARY</span>
+            <span className="p1-navIcon" aria-hidden="true">
+              <NavDiamondArrow direction="right" className="p1-navDiamondSvg" />
+            </span>
+          </button>
+        </div>
+      </main>
+    </>
   );
 }
