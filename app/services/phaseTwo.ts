@@ -20,5 +20,9 @@ export async function submitPhaseTwoImage(base64Image: string) {
     );
   }
 
-  return response.json();
+  const data = await response.json();
+
+  localStorage.setItem("phase2_results", JSON.stringify(data));
+
+  return data;
 }
