@@ -33,13 +33,13 @@ type SelectedBySection = {
   sex: string | null;
 };
 
-function formatDistribution(dist: Distribution, sort = true): Item[] {
-  const items = Object.entries(dist).map(([label, value]) => ({
-    label,
-    percentage: Math.round(value * 100),
-  }));
-  if (!sort) return items;
-  return items.sort((a, b) => b.percentage - a.percentage);
+function formatDistribution(dist: Distribution): Item[] {
+  return Object.entries(dist)
+    .map(([label, value]) => ({
+      label,
+      percentage: Math.round(value * 100),
+    }))
+    .sort((a, b) => b.percentage - a.percentage);
 }
 
 function titleCase(v: string) {
@@ -56,13 +56,12 @@ export default function Demographics() {
   const [data, setData] = useState<PhaseTwoData | null>(null);
   const [section, setSection] = useState<Section>("race");
 
-  const [selectedBySection, setSelectedBySection] = useState<SelectedBySection>(
-    {
+  const [selectedBySection, setSelectedBySection] =
+    useState<SelectedBySection>({
       race: null,
       age: null,
       sex: null,
-    }
-  );
+    });
 
   const [hoverLeft, setHoverLeft] = useState<Section | null>(null);
   const [hoverRight, setHoverRight] = useState<string | null>(null);
@@ -84,17 +83,17 @@ export default function Demographics() {
   }, []);
 
   const race = useMemo(
-    () => (data ? formatDistribution(data.race, true) : []),
+    () => (data ? formatDistribution(data.race) : []),
     [data]
   );
 
   const age = useMemo(
-    () => (data ? formatDistribution(data.age, false) : []),
+    () => (data ? formatDistribution(data.age) : []),
     [data]
   );
 
   const sex = useMemo(
-    () => (data ? formatDistribution(data.gender, true) : []),
+    () => (data ? formatDistribution(data.gender) : []),
     [data]
   );
 
@@ -109,9 +108,7 @@ export default function Demographics() {
 
   const active = useMemo(() => {
     if (!list.length) return null;
-
     if (!selectedForSection) return list[0];
-
     return list.find((i) => i.label === selectedForSection) ?? list[0];
   }, [list, selectedForSection]);
 
@@ -131,12 +128,7 @@ export default function Demographics() {
 
   useEffect(() => {
     if (!data) return;
-
-    setSelectedBySection({
-      race: null,
-      age: null,
-      sex: null,
-    });
+    setSelectedBySection({ race: null, age: null, sex: null });
   }, [data]);
 
   const defaultLabels = useMemo(
